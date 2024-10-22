@@ -3,6 +3,8 @@ package repositorios
 import (
 	"api/src/modelos"
 	"database/sql"
+	"fmt"
+	"strings"
 )
 
 // usuarios representa um repositório de usuários
@@ -67,10 +69,12 @@ func (repositorio usuarios) BuscarUsuarios() ([]modelos.Usuario, error) {
 
 // Buscar traz todos os usuários que atendem um filtro de nome ou nick
 func (repositorio usuarios) Buscar(nomeOuNick string) ([]modelos.Usuario, error) {
-	nomeOuNick = "%" + nomeOuNick + "%"
+	nomeOuNick = fmt.Sprintf("%%%s%%", nomeOuNick)
+	nomeOuNick = strings.ToLower(nomeOuNick)
+	nomeOuNick = strings.TrimSpace(nomeOuNick)
 
 	linhas, erro := repositorio.db.Query(
-		"select id, nome, nick, email, criadoEm from usuarios where nome like ? or nick like ?",
+		"select id, nome, nick, email, data_criacao from usuarios where nome like ? or nick like ?",
 		nomeOuNick, nomeOuNick,
 	)
 	if erro != nil {

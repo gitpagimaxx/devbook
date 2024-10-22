@@ -7,7 +7,6 @@ import (
 	"api/src/respostas"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -51,21 +50,22 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 // BuscarUsuarios busca todos os usuários salvos no banco de dados
 func BuscarUsuarios(w http.ResponseWriter, r *http.Request) {
 
+	nomeOuNick := r.URL.Query().Get("usuario")
+
 	db, err := db.Conectar()
 	if err != nil {
-		log.Fatal(err)
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
 	}
 
 	repositorios := repositorios.NovoRepositorioDeUsuarios(db)
-	usuarios, err := repositorios.BuscarUsuarios()
+	usuarios, err := repositorios.Buscar(nomeOuNick)
 	if err != nil {
-		log.Fatal(err)
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(usuarios); err != nil {
-		log.Fatal(err)
-	}
+	respostas.JSON(w, http.StatusOK, usuarios)
 
 }
 
